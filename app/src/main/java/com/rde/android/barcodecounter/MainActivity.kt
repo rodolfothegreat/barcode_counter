@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         edtBarcode.addTextChangedListener(object : TextWatcher{
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -44,6 +46,24 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        btnDelete.setOnClickListener(View.OnClickListener { deleteData() })
+    }
+
+    fun deleteData()
+    {
+        val fragmentManager = getSupportFragmentManager();
+        val dlg = ConfirmationDlg.newInstance("Are you sure you want to delete the whole list?" , 1);
+        dlg.show(fragmentManager, "iDDConfirmationlDlg")
+        dlg.idConfirmationListener = object : ConfirmationDlg.IdConfirmDlgListener {
+            override fun onConfirm(itemIndex: Int) {
+                this@MainActivity.lstBarcode.clear();
+                this@MainActivity.rviewBarcodes.adapter?.notifyDataSetChanged();
+
+
+            }
+
+        }
     }
 
     fun hideKeyboard() {
@@ -54,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     private fun processbarcode(barcode : String)
     {
         var bfound = false
+        if(barcode.length < 3)
+            return
         for (i in lstBarcode.indices)
         {
             val rowData = lstBarcode[i]
@@ -77,6 +99,11 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideKeyboard()
     }
 
     private fun populateSampledata()
