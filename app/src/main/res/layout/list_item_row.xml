@@ -10,13 +10,13 @@
         android:id="@+id/txtRowBarcode"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="9dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="TextView"
         android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toStartOf="@+id/txtRowQty"
-        app:layout_constraintStart_toEndOf="@+id/btnRowDelete"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
@@ -28,7 +28,7 @@
         android:background="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/edit" />
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
 
     <TextView
         android:id="@+id/txtRowQty"
@@ -41,14 +41,4 @@
         app:layout_constraintEnd_toStartOf="@+id/btnRowEdit"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/btnRowDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_delete" />
 </androidx.constraintlayout.widget.ConstraintLayout>
