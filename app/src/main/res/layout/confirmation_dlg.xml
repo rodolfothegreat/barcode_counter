@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -41,6 +42,7 @@
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintTop_toBottomOf="@+id/ivAboutLogo" />
 
     <Button
@@ -50,6 +52,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         android:text="@android:string/yes"
+        android:layout_marginBottom="8dp"
+        style="@android:style/Widget.Button"
+        android:background="@color/colorBackgroundComp"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toStartOf="@+id/btnCCancel"
         app:layout_constraintTop_toBottomOf="@+id/tvCMessage" />
 
@@ -60,6 +66,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="@android:string/no"
+        android:layout_marginBottom="8dp"
+        style="@android:style/Widget.Button"
+        android:background="@color/colorBackgroundComp"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvCMessage" />
 

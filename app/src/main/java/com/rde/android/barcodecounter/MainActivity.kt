@@ -273,14 +273,44 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
     }
 
     override fun itemEdit(index: Int) {
-        //TODO("Not yet implemented")
+        if(index < 0 || index >= lstBarcode.size)
+            return;
+
+        val rowData = lstBarcode[index]
+        val fragmentManager = getSupportFragmentManager();
+        val dlg = RecordDlg.newInstance(rowData.barcode, rowData.qty);
+        dlg.show(fragmentManager, "iDDConfirmationlDlg")
+        dlg.idSaveDlgListener = object : RecordDlg.IdSaveDlgListener{
+            override fun onsave(qty: Int) {
+                rowData.qty = qty
+                this@MainActivity.rviewBarcodes.adapter?.notifyItemChanged(index)
+            }
+
+        }
+
+
+
     }
 
     override fun itemDelete(index: Int) {
-        if(index >= 0 && index < lstBarcode.size) {
-            lstBarcode.removeAt(index)
-            this@MainActivity.rviewBarcodes.adapter?.notifyDataSetChanged();
+        if(index < 0 || index >= lstBarcode.size)
+            return;
+        val rowData = lstBarcode[index]
+        val fragmentManager = getSupportFragmentManager();
+        val dlg = ConfirmationDlg.newInstance("Are you sure you want to delete the barcode " + rowData.barcode + "?", 1);
+        dlg.show(fragmentManager, "iDDConfirmationlDlg")
+        dlg.idConfirmationListener = object : ConfirmationDlg.IdConfirmDlgListener {
+            override fun onConfirm(itemIndex: Int) {
+                lstBarcode.removeAt(index)
+                this@MainActivity.rviewBarcodes.adapter?.notifyDataSetChanged();
+            }
+
         }
+
+
+
+
+
     }
 
 }

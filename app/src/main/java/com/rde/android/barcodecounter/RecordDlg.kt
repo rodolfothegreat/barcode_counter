@@ -10,20 +10,21 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
-import kotlinx.android.synthetic.main.confirmation_dlg.view.*
+import com.shawnlin.numberpicker.NumberPicker
+import kotlinx.android.synthetic.main.record_dlg.view.*
 
+class RecordDlg : DialogFragment() {
 
-class ConfirmationDlg : DialogFragment() {
     init {
-        setRetainInstance(true)
+        retainInstance = true
     }
 
-    private var btnCCancel: Button? = null
-    private var btnCOk: Button? = null
-    private var tvCMessage: TextView? = null
+    private var btnRecOk : Button? = null
+    private var btnRecCancel : Button? = null
+    private var tvDlgBarcode : TextView? = null
+    private var number_picker : NumberPicker? = null
 
-
-    public var idConfirmationListener: IdConfirmDlgListener? = null
+    var idSaveDlgListener : IdSaveDlgListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,25 +43,30 @@ class ConfirmationDlg : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.confirmation_dlg, container);
+        return inflater.inflate(R.layout.record_dlg, container);
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btnCCancel = view.btnCCancel
-        btnCOk = view.btnCOk
-        tvCMessage = view.tvCMessage
-        val itemIndex = getArguments()?.getInt(ID_INDEX, -1);
-        tvCMessage?.text = arguments?.getString(ID_MESSAGE, "")
+        btnRecCancel = view.btnRecCancel
+        btnRecCancel?.setOnClickListener { dismiss() }
 
-        btnCCancel?.setOnClickListener { dismiss() }
+        tvDlgBarcode = view.tvDlgBarcode
+        tvDlgBarcode?.text = arguments?.getString(ID_BARCODE, "")
 
-        btnCOk?.setOnClickListener {
-            if (itemIndex != null) {
-                idConfirmationListener?.onConfirm(itemIndex)
-            }
+        number_picker = view.number_picker
+        number_picker?.value = arguments!!.getInt(ID_QTY, 0)
+
+        btnRecOk = view.btnRecOk
+        btnRecOk?.setOnClickListener {
+            val newQty = number_picker?.value
+            if(newQty != null)
+                idSaveDlgListener?.onsave(newQty)
             dismiss()
         }
+
+
+
     }
 
     override fun onStart() {
@@ -72,7 +78,6 @@ class ConfirmationDlg : DialogFragment() {
         dialog.getWindow()?.requestFeature(Window.FEATURE_NO_TITLE);
         return dialog
     }
-
     override fun onResume() {
         super.onResume()
         val params = dialog?.window?.attributes
@@ -80,23 +85,21 @@ class ConfirmationDlg : DialogFragment() {
         dialog?.window?.attributes = params
     }
 
-
-
-
-    interface IdConfirmDlgListener {
-        fun onConfirm(itemIndex: Int)
+    interface IdSaveDlgListener {
+        fun onsave(qty: Int)
     }
+
 
     companion object {
         const val COMPANION_OBJECT_NUMBER = 40
-        const val ID_MESSAGE = "id_message";
-        const val ID_INDEX = "id_index"
-        fun newInstance(acaption: String, anIndex: Int) : ConfirmationDlg
+        const val ID_BARCODE = "id_barcode";
+        const val ID_QTY = "id_qty"
+        fun newInstance(abarcode: String, aqty: Int) : RecordDlg
         {
-            val dlg = ConfirmationDlg()
+            val dlg = RecordDlg()
             val abundle = Bundle()
-            abundle.putString(ID_MESSAGE, acaption)
-            abundle.putInt(ID_INDEX, anIndex)
+            abundle.putString(ID_BARCODE, abarcode)
+            abundle.putInt(ID_QTY, aqty)
             dlg.setArguments(abundle)
             return dlg
         }

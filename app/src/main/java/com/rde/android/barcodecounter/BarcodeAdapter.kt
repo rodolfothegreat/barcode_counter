@@ -47,7 +47,6 @@ class BarcodeAdapter(val items: ArrayList<RowData>, val context: Context) : Recy
                         when (item!!.itemId) {
                             R.id.miEdit -> {
                                 if (context is BarcodeAdapter.IdListItemEdit) {
-                                    val idListEdit : BarcodeAdapter.IdListItemEdit = context
                                     context.itemEdit(position);
                                 }
                             }

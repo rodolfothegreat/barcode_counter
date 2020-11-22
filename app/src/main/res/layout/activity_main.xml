@@ -74,12 +74,12 @@
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:id="@+id/btnAbout"
+        android:id="@+id/btnShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         style="@android:style/Widget.Button"
-        android:text="About"
+        android:text="Share"
         android:background="@color/colorBackgroundComp"
         android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
