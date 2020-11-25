@@ -2,8 +2,11 @@ package com.rde.android.barcodecounter
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -11,13 +14,12 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.BufferedReader
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStreamReader
+import java.io.*
+import java.net.URLConnection
 
 
 class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
@@ -55,6 +57,16 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
         btnDelete.setOnClickListener(View.OnClickListener { deleteData() })
         checkAndRequestPermissions()
+
+        btnShare.setOnClickListener {
+            saveAll();
+            shareFile(FILE_NAME);
+        }
+
+        btnExport.setOnClickListener{
+            exportFile()
+        }
+
     }
 
     fun deleteData()
@@ -131,7 +143,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
                     var aqty : Int = 0
                     try {
                       aqty = fields[1].toInt()
-                    } catch (ee : java.lang.Exception){
+                    } catch (ee: java.lang.Exception){
                         aqty = 0
                     }
                     rowData.qty = aqty
@@ -158,6 +170,10 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         }
 
         val content = stringBuilder.toString()
+        val root = getExternalFilesDir(null)
+        val rootPath = root!!.absolutePath
+
+        val afilename: String = rootPath + File.separator + FILE_NAME
         createUpdateFile(FILE_NAME, content, false)
     }
 
@@ -176,6 +192,63 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             e.printStackTrace()
         }
     }
+
+    private fun exportFile()
+    {
+        val docs = File(
+            Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS
+            ), "YourAppDirectory"
+        )
+
+        val stringBuilder: StringBuilder = StringBuilder()
+        for (i in lstBarcode.indices)
+        {
+            val rowData = lstBarcode[i]
+            val aline = rowData.barcode.replace(";", ",") + ";" + rowData.qty.toString() + System.getProperty(
+                "line.separator"
+            );
+            stringBuilder.append(aline)
+        }
+
+        val content = stringBuilder.toString()
+
+
+// Make the directory if it does not yet exist
+// Make the directory if it does not yet exist
+        docs.mkdirs()
+        saveAll()
+        val afilename: String = docs.absolutePath + File.separator + FILE_NAME
+        createUpdateFile(afilename, content, false)
+
+
+    }
+
+    private fun shareFile(filename: String) {
+
+        val root = getExternalFilesDir(null)
+        val rootPath = root!!.absolutePath
+
+        val afilename: String = rootPath + File.separator + filename
+
+
+        val file = File(afilename)
+        val intentShareFile = Intent(Intent.ACTION_SEND)
+
+        // Uri apkURI = FileProvider.getUriForFile(ListActivity.this,
+        //        BuildConfig.APPLICATION_ID + ".provider",
+        //         file);
+        val apkURI: Uri =
+            FileProvider.getUriForFile(applicationContext, "$packageName.provider", file)
+        intentShareFile.type = URLConnection.guessContentTypeFromName(file.getName())
+        intentShareFile.putExtra(Intent.EXTRA_STREAM, apkURI)
+
+        //if you need
+        //intentShareFile.putExtra(Intent.EXTRA_SUBJECT,"Sharing File Subject);
+        //intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File Description");
+        startActivity(Intent.createChooser(intentShareFile, "Share File"))
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -297,7 +370,10 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             return;
         val rowData = lstBarcode[index]
         val fragmentManager = getSupportFragmentManager();
-        val dlg = ConfirmationDlg.newInstance("Are you sure you want to delete the barcode " + rowData.barcode + "?", 1);
+        val dlg = ConfirmationDlg.newInstance(
+            "Are you sure you want to delete the barcode " + rowData.barcode + "?",
+            1
+        );
         dlg.show(fragmentManager, "iDDConfirmationlDlg")
         dlg.idConfirmationListener = object : ConfirmationDlg.IdConfirmDlgListener {
             override fun onConfirm(itemIndex: Int) {
