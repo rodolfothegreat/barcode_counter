@@ -9,4 +9,9 @@ class RowData() {
         barcode = _barcode
         qty = _qty
     }
+
+    fun toCsvString() : String
+    {
+        return barcode.replace(",", ";")  + "," + qty.toString()
+    }
 }

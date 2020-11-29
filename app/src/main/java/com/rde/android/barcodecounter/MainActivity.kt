@@ -9,17 +9,22 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 import java.net.URLConnection
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
@@ -122,8 +127,91 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
     fun getAll()
     {
-        getDataFromFile(FILE_NAME)
+        getDataFromFile_1(FILE_NAME)
     }
+
+    private fun saveFile(csvFileName: String): Boolean {
+        val root = getExternalFilesDir(null)
+        val rootPath = root!!.absolutePath
+        val afilename = rootPath + File.separator + csvFileName
+        //String afilename = csvFileName;
+        if (lstBarcode == null || lstBarcode.size === 0) {
+            val afile = File(afilename)
+            if (afile.exists()) {
+                afile.delete()
+            }
+            return false
+        }
+        val afile = File(afilename)
+        var fileWriter: FileWriter? = null
+        var br: BufferedWriter? = null
+        Log.d(TAG, "filename: $csvFileName")
+        return try {
+            fileWriter = FileWriter(afilename, false) //overwrites file
+            br = BufferedWriter(fileWriter)
+            for (i in 0 until lstBarcode.size) {
+                val anObj = lstBarcode.get(i)
+                br.write(anObj.toCsvString().toString() + System.getProperty("line.separator"))
+            }
+            true
+        } catch (e: IOException) {
+            val newFragment =
+                WrongLoginDlg("Could not create write file " + afilename + " " + e.message)
+            newFragment.show(supportFragmentManager, "loginDlg")
+            false
+        } finally {
+            try {
+                br?.close()
+                fileWriter?.close()
+            } catch (e: java.lang.Exception) {
+            }
+        }
+    }
+
+    private fun getDataFromFile_1(csvFileName : String) {
+        if (csvFileName == null || csvFileName.equals("")) return
+        val root = getExternalFilesDir(null)
+        val rootPath = root!!.absolutePath
+        val afilename = rootPath + File.separator + csvFileName
+        //String afilename = csvFileName;
+        val afile = File(afilename)
+        if (!afile.exists()) return
+        var aline = ""
+        var acount = 0
+        var bufferReader: BufferedReader? = null
+        try {
+            bufferReader = BufferedReader(FileReader(afilename))
+            lstBarcode.clear()
+            while (bufferReader.readLine().also { aline = it } != null) {
+                acount++
+                //if(acount == 1)
+                //    continue;
+                val theFields = aline.split(",".toRegex()).toTypedArray()
+                if (theFields.size < 2) {
+                    continue
+                }
+                val anObj = RowData()
+                lstBarcode.add(anObj)
+                anObj.barcode = theFields[0]
+                var aqty = 0
+                try {
+                    aqty = theFields[1].toInt()
+                } catch (ee: java.lang.Exception) {
+                }
+                anObj.qty = aqty
+            }
+            rviewBarcodes.adapter?.notifyDataSetChanged();
+        } catch (ex: Exception) {
+            Log.e(TAG, "Error reading file " + afilename + " " + ex.message)
+        } finally {
+            try {
+                bufferReader?.close()
+            } catch (exy: IOException) {
+                Log.e(TAG, " " + exy.message)
+            }
+        }
+    }
+
 
     fun getDataFromFile(fileName: String)
     {
@@ -135,7 +223,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             var line: String = reader.readLine()
             while (line != null) {
                 sb.append(line)
-                val fields = line.split(';')
+                val fields = line.split(',')
                 if(fields.size > 1)
                 {
                     val rowData = RowData()
@@ -159,11 +247,12 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
     }
 
     fun saveAll() {
+        /*
         val stringBuilder: StringBuilder = StringBuilder()
         for (i in lstBarcode.indices)
         {
             val rowData = lstBarcode[i]
-            val aline = rowData.barcode.replace(";", ",") + ";" + rowData.qty.toString() + System.getProperty(
+            val aline = rowData.barcode.replace(",", ";") + "," + rowData.qty.toString() + System.getProperty(
                 "line.separator"
             );
             stringBuilder.append(aline)
@@ -175,6 +264,11 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
         val afilename: String = rootPath + File.separator + FILE_NAME
         createUpdateFile(FILE_NAME, content, false)
+
+         */
+
+        saveFile(FILE_NAME)
+
     }
 
     private fun createUpdateFile(fileName: String, content: String, update: Boolean) {
@@ -198,30 +292,41 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         val docs = File(
             Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS
-            ), "YourAppDirectory"
+            ), "barcodecounter"
         )
 
-        val stringBuilder: StringBuilder = StringBuilder()
-        for (i in lstBarcode.indices)
+
+
+// Make the directory if it does not yet exist
+// Make the directory if it does not yet exist
+        try {
+            docs.mkdirs()
+            saveAll()
+            val root = getExternalFilesDir(null)
+            val rootPath = root!!.absolutePath
+
+            val afilsourcename = rootPath + File.separator + FILE_NAME
+            //String afilename = csvFileName;
+            val afile = File(afilsourcename)
+
+
+            val afilename: String = docs.absolutePath + File.separator + FILE_NAME
+
+            val afileDest = File(afilename)
+            if(afileDest.exists())
+            {
+                afileDest.delete()
+            }
+            afile.copyTo(afileDest)
+            Snackbar.make(
+                rootLayout,
+                "File copied to " + docs.absolutePath + File.separator + FILE_NAME,
+                Snackbar.LENGTH_LONG
+            ).show()
+        } catch (E: Exception)
         {
-            val rowData = lstBarcode[i]
-            val aline = rowData.barcode.replace(";", ",") + ";" + rowData.qty.toString() + System.getProperty(
-                "line.separator"
-            );
-            stringBuilder.append(aline)
+            Snackbar.make(rootLayout, "Could not export file. " + E.message, Snackbar.LENGTH_LONG).show()
         }
-
-        val content = stringBuilder.toString()
-
-
-// Make the directory if it does not yet exist
-// Make the directory if it does not yet exist
-        docs.mkdirs()
-        saveAll()
-        val afilename: String = docs.absolutePath + File.separator + FILE_NAME
-        createUpdateFile(afilename, content, false)
-
-
     }
 
     private fun shareFile(filename: String) {
@@ -343,6 +448,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
     {
         const val FILE_NAME = "barcodes.csv"
         const val EXPORT_FILE = "download.txt"
+        const val TAG = "MainActivity"
     }
 
     override fun itemEdit(index: Int) {
