@@ -20,6 +20,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 import java.net.URLConnection
@@ -30,12 +31,15 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
     private val lstBarcode = ArrayList<RowData>()
+    internal var qrScanIntegrator: IntentIntegrator? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //populateSampledata()
         rviewBarcodes.layoutManager = LinearLayoutManager(this)
         rviewBarcodes.adapter = BarcodeAdapter(lstBarcode, this)
+        qrScanIntegrator = IntentIntegrator(this)
 
         edtBarcode.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -72,7 +76,35 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             exportFile()
         }
 
+        btnCamera.setOnClickListener(object :  View.OnClickListener {
+            override fun onClick(v: View?) {
+                saveAll()
+                qrScanIntegrator?.initiateScan()
+            }
+
+        })
+
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            // If QRCode has no data.
+            if (result.contents == null) {
+                Toast.makeText(this, "Barcode not found", Toast.LENGTH_LONG).show()
+            } else {
+                // If QRCode contains data.
+                 Snackbar.make(rootLayout,result.contents, Snackbar.LENGTH_LONG).show()
+                getAll()
+                processbarcode(result.contents)
+                saveAll()
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+
 
     fun deleteData()
     {
