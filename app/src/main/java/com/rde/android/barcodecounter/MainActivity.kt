@@ -10,6 +10,8 @@ import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -84,6 +86,29 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
         })
 
+    }
+
+    private fun showAbout()
+    {
+        AboutBox.Show(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val  inflater = getMenuInflater()
+        inflater.inflate(R.menu.main_menu, menu);
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item!!.itemId) {
+            R.id.miAbout -> {
+                showAbout()
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

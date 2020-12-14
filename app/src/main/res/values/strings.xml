@@ -3,4 +3,5 @@
     <string name="barcode_hint">Enter Barcode</string>
     <string name="delete_caption"> Delete Data </string>
     <string name="export_caption"> Export Data </string>
+    <string name="about">\nPlease see http://www.example.com. \nEmail support at support@example.com.</string>
 </resources>
