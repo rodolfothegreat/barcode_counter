@@ -10,7 +10,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
-import kotlinx.android.synthetic.main.confirmation_dlg.view.*
+
 
 
 class ConfirmationDlg : DialogFragment() {
@@ -47,9 +47,9 @@ class ConfirmationDlg : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btnCCancel = view.btnCCancel
-        btnCOk = view.btnCOk
-        tvCMessage = view.tvCMessage
+        btnCCancel = view.findViewById(R.id.btnCCancel)
+        btnCOk = view.findViewById(R.id.btnCOk)
+        tvCMessage = view.findViewById(R.id.tvCMessage)
         val itemIndex = getArguments()?.getInt(ID_INDEX, -1);
         tvCMessage?.text = arguments?.getString(ID_MESSAGE, "")
 

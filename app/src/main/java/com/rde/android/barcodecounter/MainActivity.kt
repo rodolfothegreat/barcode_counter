@@ -14,16 +14,21 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
-import kotlinx.android.synthetic.main.activity_main.*
+//import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 import java.net.URLConnection
 import java.util.*
@@ -34,16 +39,32 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
     private val lstBarcode = ArrayList<RowData>()
     internal var qrScanIntegrator: IntentIntegrator? = null
+    private var rviewBarcodes : RecyclerView? = null
+    private var edtBarcode : EditText? = null
+    private var btnDelete : Button? = null
+    private var btnShare : Button? = null
+    private var btnExport : Button? = null
+    private var btnCamera : ImageButton? = null
+    private var rootLayout : ConstraintLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //populateSampledata()
-        rviewBarcodes.layoutManager = LinearLayoutManager(this)
-        rviewBarcodes.adapter = BarcodeAdapter(lstBarcode, this)
+
+        rootLayout = findViewById(R.id.rootLayout)
+        rviewBarcodes = findViewById(R.id.rviewBarcodes)
+
+        rviewBarcodes?.layoutManager = LinearLayoutManager(this)
+        rviewBarcodes?.adapter = BarcodeAdapter(lstBarcode, this)
         qrScanIntegrator = IntentIntegrator(this)
 
-        edtBarcode.addTextChangedListener(object : TextWatcher {
+        edtBarcode = findViewById(R.id.edtBarcode)
+        btnDelete = findViewById(R.id.btnDelete)
+        btnShare = findViewById(R.id.btnShare)
+        btnCamera = findViewById(R.id.btnCamera)
+        btnExport = findViewById(R.id.btnExport)
+        edtBarcode!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
@@ -51,7 +72,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 val pepe = p0.toString();
                 if (pepe.endsWith('\n')) {
-                    this@MainActivity.edtBarcode.setText("");
+                    this@MainActivity.edtBarcode!!.setText("");
                     val abarcode = pepe.substringBefore('\n')
                     hideKeyboard()
                     this@MainActivity.processbarcode(abarcode)
@@ -66,19 +87,20 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
         })
 
-        btnDelete.setOnClickListener(View.OnClickListener { deleteData() })
+
+        btnDelete!!.setOnClickListener(View.OnClickListener { deleteData() })
         checkAndRequestPermissions()
 
-        btnShare.setOnClickListener {
+        btnShare!!.setOnClickListener {
             saveAll();
             shareFile(FILE_NAME);
         }
 
-        btnExport.setOnClickListener{
+        btnExport!!.setOnClickListener{
             exportFile()
         }
 
-        btnCamera.setOnClickListener(object :  View.OnClickListener {
+        btnCamera!!.setOnClickListener(object :  View.OnClickListener {
             override fun onClick(v: View?) {
                 saveAll()
                 qrScanIntegrator?.initiateScan()
@@ -119,7 +141,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
                 Toast.makeText(this, "Barcode not found", Toast.LENGTH_LONG).show()
             } else {
                 // If QRCode contains data.
-                 Snackbar.make(rootLayout,result.contents, Snackbar.LENGTH_LONG).show()
+                 Snackbar.make(rootLayout!!,result.contents, Snackbar.LENGTH_LONG).show()
                 getAll()
                 processbarcode(result.contents)
                 saveAll()
@@ -139,7 +161,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         dlg.idConfirmationListener = object : ConfirmationDlg.IdConfirmDlgListener {
             override fun onConfirm(itemIndex: Int) {
                 this@MainActivity.lstBarcode.clear();
-                this@MainActivity.rviewBarcodes.adapter?.notifyDataSetChanged();
+                this@MainActivity.rviewBarcodes?.adapter?.notifyDataSetChanged();
 
 
             }
@@ -149,7 +171,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
 
     fun hideKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(edtBarcode.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(edtBarcode!!.getWindowToken(), 0);
     }
 
     private fun processbarcode(barcode: String)
@@ -163,7 +185,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             if(rowData.barcode.equals(barcode) )
             {
                 rowData.qty = rowData.qty + 1
-                rviewBarcodes.adapter?.notifyItemChanged(i)
+                rviewBarcodes!!.adapter?.notifyItemChanged(i)
                 bfound = true
                 showMessage(barcode + " qty: " + rowData.qty.toString());
 
@@ -175,7 +197,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         {
             val newRowData = RowData(barcode, 1)
             lstBarcode.add(newRowData)
-            rviewBarcodes.adapter?.notifyDataSetChanged()
+            rviewBarcodes!!.adapter?.notifyDataSetChanged()
             showMessage(barcode + " qty: " + newRowData.qty.toString());
         }
 
@@ -257,7 +279,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
                 }
                 anObj.qty = aqty
             }
-            rviewBarcodes.adapter?.notifyDataSetChanged();
+            rviewBarcodes!!.adapter?.notifyDataSetChanged();
         } catch (ex: Exception) {
             Log.e(TAG, "Error reading file " + afilename + " " + ex.message)
         } finally {
@@ -296,7 +318,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
                 }
                 line = reader.readLine()
             }
-            rviewBarcodes.adapter?.notifyDataSetChanged();
+            rviewBarcodes!!.adapter?.notifyDataSetChanged();
          } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
@@ -376,13 +398,13 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
             }
             afile.copyTo(afileDest)
             Snackbar.make(
-                rootLayout,
+                rootLayout!!,
                 "File copied to " + docs.absolutePath + File.separator + FILE_NAME,
                 Snackbar.LENGTH_LONG
             ).show()
         } catch (E: Exception)
         {
-            Snackbar.make(rootLayout, "Could not export file. " + E.message, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(rootLayout!!, "Could not export file. " + E.message, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -436,7 +458,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
     }
 
     private fun showMessage(msg: String) {
-        Snackbar.make(rootLayout, msg, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(rootLayout!!, msg, Snackbar.LENGTH_LONG).show()
         //Toast.makeText(this,msg, Toast.LENGTH_LONG).show()
     }
 
@@ -519,12 +541,10 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         dlg.idSaveDlgListener = object : RecordDlg.IdSaveDlgListener{
             override fun onsave(qty: Int) {
                 rowData.qty = qty
-                this@MainActivity.rviewBarcodes.adapter?.notifyItemChanged(index)
+                this@MainActivity.rviewBarcodes!!.adapter?.notifyItemChanged(index)
             }
 
         }
-
-
 
     }
 
@@ -541,7 +561,7 @@ class MainActivity : AppCompatActivity(), BarcodeAdapter.IdListItemEdit {
         dlg.idConfirmationListener = object : ConfirmationDlg.IdConfirmDlgListener {
             override fun onConfirm(itemIndex: Int) {
                 lstBarcode.removeAt(index)
-                this@MainActivity.rviewBarcodes.adapter?.notifyDataSetChanged();
+                this@MainActivity.rviewBarcodes!!.adapter?.notifyDataSetChanged();
             }
 
         }

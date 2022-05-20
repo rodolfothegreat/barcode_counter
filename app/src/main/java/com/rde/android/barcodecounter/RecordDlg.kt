@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.shawnlin.numberpicker.NumberPicker
-import kotlinx.android.synthetic.main.record_dlg.view.*
 
 class RecordDlg : DialogFragment() {
 
@@ -48,16 +47,16 @@ class RecordDlg : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btnRecCancel = view.btnRecCancel
+        btnRecCancel = view.findViewById(R.id.btnRecCancel)
         btnRecCancel?.setOnClickListener { dismiss() }
 
-        tvDlgBarcode = view.tvDlgBarcode
+        tvDlgBarcode = view.findViewById(R.id.tvDlgBarcode)
         tvDlgBarcode?.text = arguments?.getString(ID_BARCODE, "")
 
-        number_picker = view.number_picker
-        number_picker?.value = arguments!!.getInt(ID_QTY, 0)
+        number_picker = view.findViewById(R.id.number_picker)
+        number_picker?.value = requireArguments().getInt(ID_QTY, 0)
 
-        btnRecOk = view.btnRecOk
+        btnRecOk = view.findViewById(R.id.btnRecOk)
         btnRecOk?.setOnClickListener {
             val newQty = number_picker?.value
             if(newQty != null)

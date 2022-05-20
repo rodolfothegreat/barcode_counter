@@ -1,13 +1,15 @@
 package com.rde.android.barcodecounter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.list_item_row.view.*
 
 
 class BarcodeAdapter(val items: ArrayList<RowData>, val context: Context) : RecyclerView.Adapter<BarcodeAdapter.MyViewHolder>() {
@@ -25,12 +27,12 @@ class BarcodeAdapter(val items: ArrayList<RowData>, val context: Context) : Recy
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // Holds the TextView that will add each animal to
        // val tvAnimalType = view.tv_animal_type
-        val txtRowBarcode = view.txtRowBarcode
-        val txtRowQty  = view.txtRowQty
-        val btnEdit = view.btnRowEdit
+        val txtRowBarcode : TextView = view.findViewById(R.id.txtRowBarcode)
+        val txtRowQty : TextView = view.findViewById(R.id.txtRowQty)
+        val btnEdit : ImageButton = view.findViewById(R.id.btnRowEdit)
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MyViewHolder, @SuppressLint("RecyclerView") position: Int) {
         if(position >= getItemCount())
         {
             return
